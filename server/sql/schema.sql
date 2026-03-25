@@ -1,0 +1,76 @@
+CREATE DATABASE IF NOT EXISTS placement_manager;
+USE placement_manager;
+
+CREATE TABLE IF NOT EXISTS Department (
+  DeptID INT AUTO_INCREMENT PRIMARY KEY,
+  DeptName VARCHAR(150) NOT NULL UNIQUE,
+  HOD VARCHAR(150) NOT NULL,
+  Location VARCHAR(150)
+);
+
+CREATE TABLE IF NOT EXISTS Student (
+  StudentID INT AUTO_INCREMENT PRIMARY KEY,
+  FirstName VARCHAR(100) NOT NULL,
+  LastName VARCHAR(100) NOT NULL,
+  DOB DATE NOT NULL,
+  Gender ENUM('M', 'F'),
+  Phone VARCHAR(20) UNIQUE,
+  Email VARCHAR(150) UNIQUE,
+  DeptID INT,
+  CONSTRAINT fk_student_department
+    FOREIGN KEY (DeptID)
+    REFERENCES Department (DeptID)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS Company (
+  CompanyID INT AUTO_INCREMENT PRIMARY KEY,
+  CompanyName VARCHAR(150) NOT NULL UNIQUE,
+  Industry VARCHAR(150) NOT NULL,
+  Location VARCHAR(150)
+);
+
+CREATE TABLE IF NOT EXISTS JobPosting (
+  JobID INT AUTO_INCREMENT PRIMARY KEY,
+  JobRole VARCHAR(150) NOT NULL,
+  Package INT NOT NULL,
+  Eligibility VARCHAR(255) NOT NULL,
+  CompanyID INT,
+  CONSTRAINT fk_job_company
+    FOREIGN KEY (CompanyID)
+    REFERENCES Company (CompanyID)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS Application (
+  AppID INT AUTO_INCREMENT PRIMARY KEY,
+  StudentID INT NOT NULL,
+  JobID INT NOT NULL,
+  ApplyDate DATE NOT NULL,
+  Status ENUM('Applied', 'Selected', 'Rejected') NOT NULL DEFAULT 'Applied',
+  UNIQUE KEY uq_application_student_job (StudentID, JobID),
+  CONSTRAINT fk_application_student
+    FOREIGN KEY (StudentID)
+    REFERENCES Student (StudentID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_application_job
+    FOREIGN KEY (JobID)
+    REFERENCES JobPosting (JobID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Placement (
+  PlaceID INT AUTO_INCREMENT PRIMARY KEY,
+  AppID INT NOT NULL UNIQUE,
+  OfferDate DATE NOT NULL,
+  JoiningDate DATE NOT NULL,
+  CONSTRAINT fk_placement_application
+    FOREIGN KEY (AppID)
+    REFERENCES Application (AppID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);

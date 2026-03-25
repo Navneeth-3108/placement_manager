@@ -1,0 +1,19 @@
+{
+  "name": "placement-manager",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm run dev --workspace @placement-manager/client",
+    "dev:server": "npm run dev --workspace @placement-manager/server",
+    "build": "npm run build --workspace @placement-manager/client",
+    "seed": "npm run seed --workspace @placement-manager/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
