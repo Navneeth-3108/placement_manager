@@ -34,8 +34,8 @@ const PlacementsPage = () => {
       <PageHeader title="Placements" description="Create final placement records only for selected applications" />
       <Alert message={error} />
 
-      <form onSubmit={submitPlacement} className="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-4">
-        <select required value={form.AppID} onChange={(e) => setForm((p) => ({ ...p, AppID: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+      <form onSubmit={submitPlacement} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+        <select required value={form.AppID} onChange={(e) => setForm((p) => ({ ...p, AppID: e.target.value }))} className="ui-select">
           <option value="">Select Selected Application</option>
           {applications.map((app) => (
             <option key={app.AppID} value={app.AppID}>
@@ -43,32 +43,32 @@ const PlacementsPage = () => {
             </option>
           ))}
         </select>
-        <input required type="date" value={form.OfferDate} onChange={(e) => setForm((p) => ({ ...p, OfferDate: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input required type="date" value={form.JoiningDate} onChange={(e) => setForm((p) => ({ ...p, JoiningDate: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <button type="submit" className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">Create Placement</button>
+        <input required type="date" value={form.OfferDate} onChange={(e) => setForm((p) => ({ ...p, OfferDate: e.target.value }))} className="ui-input" />
+        <input required type="date" value={form.JoiningDate} onChange={(e) => setForm((p) => ({ ...p, JoiningDate: e.target.value }))} className="ui-input" />
+        <button type="submit" className="ui-btn-ink">Create Placement</button>
       </form>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white p-3">
-        <table className="min-w-full text-left text-sm">
+      <div className="ui-card overflow-x-auto p-3">
+        <table className="ui-table">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-500">
-              <th className="px-2 py-2">Student</th>
-              <th className="px-2 py-2">Job</th>
-              <th className="px-2 py-2">Company</th>
-              <th className="px-2 py-2">Offer Date</th>
-              <th className="px-2 py-2">Joining Date</th>
+            <tr className="border-b border-slate-200">
+              <th className="ui-th">Student</th>
+              <th className="ui-th">Job</th>
+              <th className="ui-th">Company</th>
+              <th className="ui-th">Offer Date</th>
+              <th className="ui-th">Joining Date</th>
             </tr>
           </thead>
           <tbody>
             {data.map((placement) => (
-              <tr key={placement.PlaceID} className="border-b border-slate-100">
-                <td className="px-2 py-2">
+              <tr key={placement.PlaceID} className="ui-tr">
+                <td className="ui-td font-semibold">
                   {placement.Application?.Student?.FirstName} {placement.Application?.Student?.LastName}
                 </td>
-                <td className="px-2 py-2">{placement.Application?.JobPosting?.JobRole || '-'}</td>
-                <td className="px-2 py-2">{placement.Application?.JobPosting?.Company?.CompanyName || '-'}</td>
-                <td className="px-2 py-2">{placement.OfferDate}</td>
-                <td className="px-2 py-2">{placement.JoiningDate}</td>
+                <td className="ui-td">{placement.Application?.JobPosting?.JobRole || '-'}</td>
+                <td className="ui-td">{placement.Application?.JobPosting?.Company?.CompanyName || '-'}</td>
+                <td className="ui-td">{placement.OfferDate}</td>
+                <td className="ui-td">{placement.JoiningDate}</td>
               </tr>
             ))}
           </tbody>

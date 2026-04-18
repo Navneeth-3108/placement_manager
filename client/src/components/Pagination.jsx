@@ -7,7 +7,7 @@ const Pagination = ({ pagination, onChange }) => {
         type="button"
         disabled={currentPage <= 1}
         onClick={() => onChange(currentPage - 1)}
-        className="rounded-md border border-slate-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        className="ui-btn-ghost px-3 py-1"
       >
         Prev
       </button>
@@ -18,7 +18,7 @@ const Pagination = ({ pagination, onChange }) => {
         type="button"
         disabled={currentPage >= totalPages}
         onClick={() => onChange(currentPage + 1)}
-        className="rounded-md border border-slate-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        className="ui-btn-ghost px-3 py-1"
       >
         Next
       </button>

@@ -57,17 +57,17 @@ const StudentsPage = () => {
 
       <Alert message={error} />
 
-      <div className="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-3">
+      <div className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-3">
         <input
           value={filters.search}
           onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
           placeholder="Search by name or email"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="ui-input"
         />
         <select
           value={filters.DeptID}
           onChange={(e) => setFilters((prev) => ({ ...prev, DeptID: e.target.value }))}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="ui-select"
         >
           <option value="">All Departments</option>
           {departments.map((dept) => (
@@ -79,48 +79,48 @@ const StudentsPage = () => {
         <button
           type="button"
           onClick={() => setQuery((prev) => ({ ...prev, page: 1 }))}
-          className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white"
+          className="ui-btn-primary"
         >
           Apply Filters
         </button>
       </div>
 
-      <form onSubmit={submitForm} className="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-4">
-        <input required value={form.FirstName} onChange={(e) => setForm((p) => ({ ...p, FirstName: e.target.value }))} placeholder="First Name" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input required value={form.LastName} onChange={(e) => setForm((p) => ({ ...p, LastName: e.target.value }))} placeholder="Last Name" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input required type="date" value={form.DOB} onChange={(e) => setForm((p) => ({ ...p, DOB: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <select value={form.Gender} onChange={(e) => setForm((p) => ({ ...p, Gender: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm"><option value="M">Male</option><option value="F">Female</option></select>
-        <input value={form.Phone} onChange={(e) => setForm((p) => ({ ...p, Phone: e.target.value }))} placeholder="Phone" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input type="email" value={form.Email} onChange={(e) => setForm((p) => ({ ...p, Email: e.target.value }))} placeholder="Email" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <select value={form.DeptID} onChange={(e) => setForm((p) => ({ ...p, DeptID: e.target.value }))} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+      <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+        <input required value={form.FirstName} onChange={(e) => setForm((p) => ({ ...p, FirstName: e.target.value }))} placeholder="First Name" className="ui-input" />
+        <input required value={form.LastName} onChange={(e) => setForm((p) => ({ ...p, LastName: e.target.value }))} placeholder="Last Name" className="ui-input" />
+        <input required type="date" value={form.DOB} onChange={(e) => setForm((p) => ({ ...p, DOB: e.target.value }))} className="ui-input" />
+        <select value={form.Gender} onChange={(e) => setForm((p) => ({ ...p, Gender: e.target.value }))} className="ui-select"><option value="M">Male</option><option value="F">Female</option></select>
+        <input value={form.Phone} onChange={(e) => setForm((p) => ({ ...p, Phone: e.target.value }))} placeholder="Phone" className="ui-input" />
+        <input type="email" value={form.Email} onChange={(e) => setForm((p) => ({ ...p, Email: e.target.value }))} placeholder="Email" className="ui-input" />
+        <select value={form.DeptID} onChange={(e) => setForm((p) => ({ ...p, DeptID: e.target.value }))} className="ui-select">
           <option value="">Select Department</option>
           {departments.map((dept) => (
             <option key={dept.DeptID} value={dept.DeptID}>{dept.DeptName}</option>
           ))}
         </select>
-        <button type="submit" className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">Add Student</button>
+        <button type="submit" className="ui-btn-ink">Add Student</button>
       </form>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white p-3">
-        <table className="min-w-full text-left text-sm">
+      <div className="ui-card overflow-x-auto p-3">
+        <table className="ui-table">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-500">
-              <th className="px-2 py-2">Name</th>
-              <th className="px-2 py-2">Department</th>
-              <th className="px-2 py-2">Email</th>
-              <th className="px-2 py-2">Phone</th>
-              <th className="px-2 py-2">Action</th>
+            <tr className="border-b border-slate-200">
+              <th className="ui-th">Name</th>
+              <th className="ui-th">Department</th>
+              <th className="ui-th">Email</th>
+              <th className="ui-th">Phone</th>
+              <th className="ui-th">Action</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item) => (
-              <tr key={item.StudentID} className="border-b border-slate-100">
-                <td className="px-2 py-2">{item.FirstName} {item.LastName}</td>
-                <td className="px-2 py-2">{item.Department?.DeptName || '-'}</td>
-                <td className="px-2 py-2">{item.Email || '-'}</td>
-                <td className="px-2 py-2">{item.Phone || '-'}</td>
-                <td className="px-2 py-2">
-                  <button type="button" className="text-rose-600" onClick={() => removeStudent(item.StudentID)}>Delete</button>
+              <tr key={item.StudentID} className="ui-tr">
+                <td className="ui-td font-semibold">{item.FirstName} {item.LastName}</td>
+                <td className="ui-td">{item.Department?.DeptName || '-'}</td>
+                <td className="ui-td">{item.Email || '-'}</td>
+                <td className="ui-td">{item.Phone || '-'}</td>
+                <td className="ui-td">
+                  <button type="button" className="ui-btn-ghost px-3 py-1 text-rose-700" onClick={() => removeStudent(item.StudentID)}>Delete</button>
                 </td>
               </tr>
             ))}

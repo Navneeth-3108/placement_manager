@@ -10,9 +10,11 @@ const MainLayout = () => {
     <div className="min-h-screen lg:pl-64">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="p-4 lg:p-6">
-        <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <Outlet />
+      <main className="p-4 lg:p-8">
+        <div className="container-app">
+          <Navbar onMenuClick={() => setSidebarOpen(true)} />
+          <Outlet />
+        </div>
       </main>
     </div>
   );

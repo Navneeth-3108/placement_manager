@@ -30,40 +30,50 @@ const CompaniesPage = () => {
       <PageHeader title="Companies" description="Manage recruiting organizations" />
       <Alert message={error} />
 
-      <div className="mb-4 flex gap-2 rounded-xl border border-slate-200 bg-white p-4">
+      <div className="ui-card mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search company"
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="ui-input"
         />
-        <button type="button" onClick={() => setQuery((prev) => ({ ...prev, page: 1 }))} className="rounded-md bg-ocean px-4 py-2 text-sm font-semibold text-white">Search</button>
+        <button
+          type="button"
+          onClick={() => setQuery((prev) => ({ ...prev, page: 1 }))}
+          className="ui-btn-primary"
+        >
+          Search
+        </button>
       </div>
 
-      <form onSubmit={submitForm} className="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-4">
-        <input required value={form.CompanyName} onChange={(e) => setForm((p) => ({ ...p, CompanyName: e.target.value }))} placeholder="Company Name" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input required value={form.Industry} onChange={(e) => setForm((p) => ({ ...p, Industry: e.target.value }))} placeholder="Industry" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <input value={form.Location} onChange={(e) => setForm((p) => ({ ...p, Location: e.target.value }))} placeholder="Location" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        <button type="submit" className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">Add Company</button>
+      <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+        <input required value={form.CompanyName} onChange={(e) => setForm((p) => ({ ...p, CompanyName: e.target.value }))} placeholder="Company Name" className="ui-input" />
+        <input required value={form.Industry} onChange={(e) => setForm((p) => ({ ...p, Industry: e.target.value }))} placeholder="Industry" className="ui-input" />
+        <input value={form.Location} onChange={(e) => setForm((p) => ({ ...p, Location: e.target.value }))} placeholder="Location" className="ui-input" />
+        <button type="submit" className="ui-btn-ink">Add Company</button>
       </form>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white p-3">
-        <table className="min-w-full text-left text-sm">
+      <div className="ui-card overflow-x-auto p-3">
+        <table className="ui-table">
           <thead>
-            <tr className="border-b border-slate-200 text-slate-500">
-              <th className="px-2 py-2">Name</th>
-              <th className="px-2 py-2">Industry</th>
-              <th className="px-2 py-2">Location</th>
-              <th className="px-2 py-2">Action</th>
+            <tr className="border-b border-slate-200">
+              <th className="ui-th">Name</th>
+              <th className="ui-th">Industry</th>
+              <th className="ui-th">Location</th>
+              <th className="ui-th">Action</th>
             </tr>
           </thead>
           <tbody>
             {data.map((company) => (
-              <tr key={company.CompanyID} className="border-b border-slate-100">
-                <td className="px-2 py-2">{company.CompanyName}</td>
-                <td className="px-2 py-2">{company.Industry}</td>
-                <td className="px-2 py-2">{company.Location || '-'}</td>
-                <td className="px-2 py-2"><button type="button" className="text-rose-600" onClick={() => removeCompany(company.CompanyID)}>Delete</button></td>
+              <tr key={company.CompanyID} className="ui-tr">
+                <td className="ui-td font-semibold">{company.CompanyName}</td>
+                <td className="ui-td">{company.Industry}</td>
+                <td className="ui-td">{company.Location || '-'}</td>
+                <td className="ui-td">
+                  <button type="button" className="ui-btn-ghost px-3 py-1 text-rose-700" onClick={() => removeCompany(company.CompanyID)}>
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

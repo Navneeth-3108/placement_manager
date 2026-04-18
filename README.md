@@ -75,12 +75,6 @@ Option B (ORM sync):
 - Set `DB_SYNC=true` in `server/.env`
 - Start server once, then set it back to `false`
 
-### Seed Sample Data
-
-```bash
-npm run seed
-```
-
 ### Run Server
 
 ```bash
@@ -110,15 +104,13 @@ From repository root:
 - `npm run dev:server`
 - `npm run dev:client`
 - `npm run build`
-- `npm run seed`
 
 ## End-to-End Checklist
 
 1. Start MySQL and ensure credentials in `server/.env` are valid.
 2. Create schema using `server/sql/schema.sql`.
-3. Optionally seed demo data with `npm run seed` from root.
-4. Start full stack with `npm run dev` from root.
-5. Open client at `http://localhost:5173`.
+3. Start full stack with `npm run dev` from root.
+4. Open client at `http://localhost:5173`.
 
 ## Troubleshooting
 

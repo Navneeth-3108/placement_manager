@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+if (!baseURL) {
+  throw new Error('VITE_API_BASE_URL is required in client environment configuration.');
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,9 +19,7 @@ api.interceptors.response.use(
   (error) => {
     const message =
       error.response?.data?.message ||
-      (error.request
-        ? 'Cannot reach the API server. Ensure the server is running on http://localhost:5000.'
-        : error.message) ||
+      (error.request ? 'Cannot reach the API server. Check API URL and server status.' : error.message) ||
       'Unexpected error';
     return Promise.reject(new Error(message));
   }
