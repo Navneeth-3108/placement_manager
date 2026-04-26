@@ -11,7 +11,7 @@ const Pagination = ({ pagination, onChange }) => {
       >
         Prev
       </button>
-      <span className="text-sm text-slate-600">
+      <span className="text-sm text-emerald-100/70">
         Page {currentPage} of {totalPages}
       </span>
       <button

@@ -1,7 +1,55 @@
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
+const dns = require('dns');
 
 dotenv.config();
+
+// Some networks block Neon hostname lookup on local DNS.
+// Force reliable public resolvers for Node runtime DNS queries.
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
+const originalLookup = dns.lookup.bind(dns);
+
+// Force Neon host resolution through public DNS when local resolver blocks it.
+dns.lookup = (hostname, options, callback) => {
+  let normalizedOptions = options;
+  let normalizedCallback = callback;
+
+  if (typeof normalizedOptions === 'function') {
+    normalizedCallback = normalizedOptions;
+    normalizedOptions = {};
+  }
+
+  if (typeof normalizedOptions === 'number') {
+    normalizedOptions = { family: normalizedOptions };
+  }
+
+  const opts = normalizedOptions || {};
+  const wantsAll = Boolean(opts.all);
+  const family = opts.family || 0;
+  const isNeonHost = typeof hostname === 'string' && hostname.includes('.neon.tech');
+
+  if (!isNeonHost) {
+    return originalLookup(hostname, options, callback);
+  }
+
+  return dns.resolve4(hostname, (resolveErr, addresses) => {
+    if (resolveErr || !addresses || addresses.length === 0) {
+      return originalLookup(hostname, options, callback);
+    }
+
+    if (wantsAll) {
+      const all = addresses.map((address) => ({ address, family: 4 }));
+      return normalizedCallback(null, all);
+    }
+
+    if (family === 6) {
+      return originalLookup(hostname, options, callback);
+    }
+
+    return normalizedCallback(null, addresses[0], 4);
+  });
+};
 
 const commonOptions = {
   logging: String(process.env.DB_LOGGING).toLowerCase() === 'true' ? console.log : false,

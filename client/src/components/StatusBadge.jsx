@@ -1,11 +1,11 @@
 const styleMap = {
-  Applied: 'bg-sky-100 text-sky-700',
-  Selected: 'bg-emerald-100 text-emerald-700',
-  Rejected: 'bg-rose-100 text-rose-700',
+  Applied: 'bg-emerald-900/35 text-emerald-200 ring-1 ring-emerald-700/60',
+  Selected: 'bg-emerald-500/20 text-emerald-100 ring-1 ring-emerald-300/40',
+  Rejected: 'bg-slate-800 text-slate-300 ring-1 ring-slate-600',
 };
 
 const StatusBadge = ({ status }) => {
-  const cls = styleMap[status] || 'bg-slate-100 text-slate-700';
+  const cls = styleMap[status] || 'bg-slate-800 text-slate-200 ring-1 ring-slate-600';
   return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${cls}`}>{status}</span>;
 };
 

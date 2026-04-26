@@ -4,7 +4,7 @@ const Alert = ({ message }) => {
   }
 
   return (
-    <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
+    <div className="mb-4 rounded-lg border border-emerald-800/70 bg-emerald-900/25 px-4 py-2 text-sm text-emerald-200">
       {message}
     </div>
   );

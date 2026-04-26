@@ -3,17 +3,17 @@
 @tailwind utilities;
 
 :focus-visible {
-  outline: 2px solid rgba(14, 165, 233, 0.65);
+  outline: 2px solid rgba(34, 197, 94, 0.75);
   outline-offset: 2px;
 }
 
 :root {
-  --bg-primary: #f8fafc;
-  --bg-panel: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --accent-main: #0ea5e9;
-  --accent-warm: #f97316;
+  --bg-primary: #050a07;
+  --bg-panel: #0a1611;
+  --text-primary: #e8fce9;
+  --text-secondary: #9acfa7;
+  --accent-main: #22c55e;
+  --accent-warm: #16a34a;
 }
 
 body {
@@ -21,8 +21,8 @@ body {
   min-height: 100vh;
   color: var(--text-primary);
   background:
-    radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.16), transparent 30%),
-    radial-gradient(circle at 100% 100%, rgba(249, 115, 22, 0.12), transparent 30%),
+    radial-gradient(circle at 5% 0%, rgba(34, 197, 94, 0.2), transparent 38%),
+    radial-gradient(circle at 90% 100%, rgba(22, 163, 74, 0.16), transparent 32%),
     var(--bg-primary);
   font-family: ui-sans-serif, system-ui, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-rendering: optimizeLegibility;
@@ -55,34 +55,34 @@ body {
 }
 
 .ui-card {
-  @apply rounded-2xl border border-slate-200 bg-white/90 shadow-card backdrop-blur;
+  @apply rounded-2xl border border-emerald-900/60 bg-emerald-950/40 shadow-card backdrop-blur;
 }
 
 .ui-input {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition;
-  @apply placeholder:text-slate-400 focus:border-sky-300 focus:ring-4 focus:ring-sky-100;
+  @apply w-full rounded-xl border border-emerald-900/60 bg-[#0d1b14] px-3 py-2 text-sm text-emerald-50 shadow-sm transition;
+  @apply placeholder:text-emerald-100/40 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20;
 }
 
 .ui-select {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition;
-  @apply focus:border-sky-300 focus:ring-4 focus:ring-sky-100;
+  @apply w-full rounded-xl border border-emerald-900/60 bg-[#0d1b14] px-3 py-2 text-sm text-emerald-50 shadow-sm transition;
+  @apply focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/20;
 }
 
 .ui-btn {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition;
-  @apply focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 .ui-btn-primary {
-  @apply ui-btn bg-ocean text-white shadow-sm hover:brightness-110;
+  @apply ui-btn bg-emerald-500 text-slate-950 shadow-sm hover:bg-emerald-400;
 }
 
 .ui-btn-ink {
-  @apply ui-btn bg-ink text-white shadow-sm hover:brightness-110;
+  @apply ui-btn bg-emerald-800 text-emerald-50 shadow-sm hover:bg-emerald-700;
 }
 
 .ui-btn-ghost {
-  @apply ui-btn border border-slate-200 bg-white text-slate-700 hover:bg-slate-50;
+  @apply ui-btn border border-emerald-900/70 bg-emerald-950/30 text-emerald-100 hover:bg-emerald-900/40;
 }
 
 .ui-table {
@@ -90,13 +90,13 @@ body {
 }
 
 .ui-th {
-  @apply px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500;
+  @apply px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200/65;
 }
 
 .ui-td {
-  @apply px-3 py-3 text-slate-800;
+  @apply px-3 py-3 text-emerald-50;
 }
 
 .ui-tr {
-  @apply border-b border-slate-100 hover:bg-slate-50/70;
+  @apply border-b border-emerald-900/40 hover:bg-emerald-900/20;
 }

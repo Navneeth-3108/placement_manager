@@ -7,7 +7,7 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen lg:pl-64">
+    <div className="min-h-screen bg-transparent lg:pl-64">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="p-4 lg:p-8">
