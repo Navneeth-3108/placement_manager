@@ -3,11 +3,13 @@ import PageHeader from '../components/PageHeader';
 import Alert from '../components/Alert';
 import Pagination from '../components/Pagination';
 import usePaginatedResource from '../hooks/usePaginatedResource';
+import useRbacRole from '../hooks/useRbacRole';
 import { getList, postItem } from '../services/endpoints';
 
 const PlacementsPage = () => {
   const [applications, setApplications] = useState([]);
   const [form, setForm] = useState({ AppID: '', OfferDate: '', JoiningDate: '' });
+  const permissions = useRbacRole();
 
   const fetchPlacements = useCallback((query) => getList('/placements', query), []);
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchPlacements);
@@ -34,7 +36,7 @@ const PlacementsPage = () => {
       <PageHeader title="Placements" description="Create final placement records only for selected applications" />
       <Alert message={error} />
 
-      <form onSubmit={submitPlacement} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+      {permissions.canManage && <form onSubmit={submitPlacement} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <select required value={form.AppID} onChange={(e) => setForm((p) => ({ ...p, AppID: e.target.value }))} className="ui-select">
           <option value="">Select Selected Application</option>
           {applications.map((app) => (
@@ -46,7 +48,7 @@ const PlacementsPage = () => {
         <input required type="date" value={form.OfferDate} onChange={(e) => setForm((p) => ({ ...p, OfferDate: e.target.value }))} className="ui-input" />
         <input required type="date" value={form.JoiningDate} onChange={(e) => setForm((p) => ({ ...p, JoiningDate: e.target.value }))} className="ui-input" />
         <button type="submit" className="ui-btn-ink">Create Placement</button>
-      </form>
+      </form>}
 
       <div className="ui-card overflow-x-auto p-3">
         <table className="ui-table">

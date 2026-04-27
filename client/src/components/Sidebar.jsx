@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 const navItems = [
-  { to: '/', label: 'Dashboard' },
+  { to: '/', label: 'Dashboard', allow: ({ canViewDashboard }) => canViewDashboard },
   { to: '/students', label: 'Students' },
   { to: '/companies', label: 'Companies' },
   { to: '/jobs', label: 'Jobs' },
@@ -9,7 +9,9 @@ const navItems = [
   { to: '/placements', label: 'Placements' },
 ];
 
-const Sidebar = ({ open, onClose }) => {
+const Sidebar = ({ open, onClose, permissions }) => {
+  const visibleItems = navItems.filter((item) => (item.allow ? item.allow(permissions) : true));
+
   return (
     <>
       <div
@@ -27,7 +29,7 @@ const Sidebar = ({ open, onClose }) => {
         </div>
 
         <nav className="space-y-2">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

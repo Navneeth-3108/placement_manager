@@ -3,11 +3,13 @@ import PageHeader from '../components/PageHeader';
 import Alert from '../components/Alert';
 import Pagination from '../components/Pagination';
 import usePaginatedResource from '../hooks/usePaginatedResource';
+import useRbacRole from '../hooks/useRbacRole';
 import { deleteItem, getList, postItem } from '../services/endpoints';
 
 const CompaniesPage = () => {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ CompanyName: '', Industry: '', Location: '' });
+  const permissions = useRbacRole();
 
   const fetchCompanies = useCallback((query) => getList('/companies', { ...query, search }), [search]);
 
@@ -46,12 +48,12 @@ const CompaniesPage = () => {
         </button>
       </div>
 
-      <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+      {permissions.canManage && <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <input required value={form.CompanyName} onChange={(e) => setForm((p) => ({ ...p, CompanyName: e.target.value }))} placeholder="Company Name" className="ui-input" />
         <input required value={form.Industry} onChange={(e) => setForm((p) => ({ ...p, Industry: e.target.value }))} placeholder="Industry" className="ui-input" />
         <input value={form.Location} onChange={(e) => setForm((p) => ({ ...p, Location: e.target.value }))} placeholder="Location" className="ui-input" />
         <button type="submit" className="ui-btn-ink">Add Company</button>
-      </form>
+      </form>}
 
       <div className="ui-card overflow-x-auto p-3">
         <table className="ui-table">
@@ -60,7 +62,7 @@ const CompaniesPage = () => {
               <th className="ui-th">Name</th>
               <th className="ui-th">Industry</th>
               <th className="ui-th">Location</th>
-              <th className="ui-th">Action</th>
+              {permissions.canDelete && <th className="ui-th">Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -69,11 +71,11 @@ const CompaniesPage = () => {
                 <td className="ui-td font-semibold">{company.CompanyName}</td>
                 <td className="ui-td">{company.Industry}</td>
                 <td className="ui-td">{company.Location || '-'}</td>
-                <td className="ui-td">
+                {permissions.canDelete && <td className="ui-td">
                   <button type="button" className="ui-btn-ghost px-3 py-1 text-rose-700" onClick={() => removeCompany(company.CompanyID)}>
                     Delete
                   </button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

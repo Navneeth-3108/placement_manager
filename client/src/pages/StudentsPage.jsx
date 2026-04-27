@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader';
 import Alert from '../components/Alert';
 import Pagination from '../components/Pagination';
 import usePaginatedResource from '../hooks/usePaginatedResource';
+import useRbacRole from '../hooks/useRbacRole';
 import { deleteItem, getList, postItem } from '../services/endpoints';
 
 const StudentsPage = () => {
@@ -17,6 +18,7 @@ const StudentsPage = () => {
   });
   const [filters, setFilters] = useState({ search: '', DeptID: '' });
   const [departments, setDepartments] = useState([]);
+  const permissions = useRbacRole();
 
   const fetchStudents = useCallback(
     (query) => getList('/students', { ...query, ...filters }),
@@ -85,7 +87,7 @@ const StudentsPage = () => {
         </button>
       </div>
 
-      <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+      {permissions.canManage && <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <input required value={form.FirstName} onChange={(e) => setForm((p) => ({ ...p, FirstName: e.target.value }))} placeholder="First Name" className="ui-input" />
         <input required value={form.LastName} onChange={(e) => setForm((p) => ({ ...p, LastName: e.target.value }))} placeholder="Last Name" className="ui-input" />
         <input required type="date" value={form.DOB} onChange={(e) => setForm((p) => ({ ...p, DOB: e.target.value }))} className="ui-input" />
@@ -99,7 +101,7 @@ const StudentsPage = () => {
           ))}
         </select>
         <button type="submit" className="ui-btn-ink">Add Student</button>
-      </form>
+      </form>}
 
       <div className="ui-card overflow-x-auto p-3">
         <table className="ui-table">
@@ -109,7 +111,7 @@ const StudentsPage = () => {
               <th className="ui-th">Department</th>
               <th className="ui-th">Email</th>
               <th className="ui-th">Phone</th>
-              <th className="ui-th">Action</th>
+              {permissions.canDelete && <th className="ui-th">Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -119,9 +121,9 @@ const StudentsPage = () => {
                 <td className="ui-td">{item.Department?.DeptName || '-'}</td>
                 <td className="ui-td">{item.Email || '-'}</td>
                 <td className="ui-td">{item.Phone || '-'}</td>
-                <td className="ui-td">
+                {permissions.canDelete && <td className="ui-td">
                   <button type="button" className="ui-btn-ghost px-3 py-1 text-rose-700" onClick={() => removeStudent(item.StudentID)}>Delete</button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

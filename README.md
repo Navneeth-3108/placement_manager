@@ -1,12 +1,12 @@
 # Placement Management System
 
-Full-stack placement management platform with a React + Tailwind client and a Node.js + Express + Sequelize + MySQL server.
+Full-stack placement management platform with a React + Tailwind client and a Node.js + Express + Sequelize server.
 
 ## Tech Stack
 
 - Client: React (Vite), Tailwind CSS, React Router, Axios
 - Server: Node.js, Express.js, Sequelize ORM
-- Database: MySQL
+- Database: PostgreSQL or MySQL (via Sequelize)
 
 ## Project Structure
 
@@ -36,7 +36,7 @@ placement_manager/
 
 - Node.js 18+
 - npm 9+
-- MySQL 8+
+- PostgreSQL 14+ or MySQL 8+
 
 ## Monorepo Setup
 
@@ -60,17 +60,20 @@ cp .env.example .env
 npm install
 ```
 
-Edit `server/.env` with your local MySQL credentials.
+Edit `server/.env` with one of the supported DB configurations:
+
+- `DATABASE_URL` (recommended for hosted Postgres providers like Neon)
+- or `DB_*` credentials for local MySQL/Postgres
 
 ### Create Database Tables
 
-Option A (recommended, SQL-first):
+Option A (MySQL SQL-first):
 
 ```bash
 mysql -u root -p < sql/schema.sql
 ```
 
-Option B (ORM sync):
+Option B (dialect-agnostic Sequelize sync):
 
 - Set `DB_SYNC=true` in `server/.env`
 - Start server once, then set it back to `false`
@@ -123,7 +126,7 @@ From repository root:
 ### API returns unavailable/database message
 
 - Server now stays online even if DB is unavailable and returns `503` for API routes.
-- Fix DB settings in `server/.env` and MySQL access.
+- Fix DB settings in `server/.env` and DB access.
 - Server retries DB connection automatically every 15 seconds.
 
 ## API Summary
@@ -145,7 +148,41 @@ All routes are prefixed with `/api`.
   - Create: `POST /placements`
   - List: `GET /placements`
   - Enforces 1:1 with `Application` and only `Selected` applications
+  - On placement creation, other active applications of the same student are auto-marked `Rejected`
+- A student who already has a placement cannot apply to new jobs
 - Dashboard stats: `GET /dashboard/stats`
+
+## RBAC Authorization
+
+Backend RBAC is implemented with three roles:
+
+- `admin`: full access (including delete operations)
+- `officer`: create/update/read access for operational modules
+- `student`: read access + apply for jobs
+
+### Enable RBAC
+
+Set `RBAC_ENABLED=true` in `server/.env`.
+Set `RBAC_ADMIN_EMAILS=24z218@psgtech.ac.in` (comma-separated if needed for multiple admins).
+Set `VITE_RBAC_ADMIN_EMAIL=24z218@psgtech.ac.in` in `client/.env` for matching UI role behavior.
+
+When enabled, each request must include:
+
+- `x-user-id`: any non-empty user identifier
+- `x-user-email`: user email (used to resolve admin from `RBAC_ADMIN_EMAILS`)
+- `x-user-role`: optional override (`admin`, `officer`, `student`) for non-admin emails; defaults to `student`
+
+### Student data isolation rules
+
+- Student role can only access applications that belong to their own email.
+- Student role can only apply using a student profile with matching email.
+- Student role can only see placements tied to their own applications.
+
+Example:
+
+```bash
+curl -H "x-user-id: u123" -H "x-user-role: officer" http://localhost:5000/api/dashboard/stats
+```
 
 ## Production Notes
 

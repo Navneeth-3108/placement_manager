@@ -10,7 +10,7 @@ const {
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
 
-const getApplications = async ({ page, limit, search, StudentID, JobID, Status }) => {
+const getApplications = async ({ page, limit, search, StudentID, JobID, Status }, authUser) => {
   const pagination = getPagination(page, limit);
   const where = {};
 
@@ -24,18 +24,24 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status }
     where.Status = Status;
   }
 
+  const studentWhere = {};
+
+  if (search) {
+    studentWhere[Op.or] = [{ FirstName: { [Op.like]: `%${search}%` } }, { LastName: { [Op.like]: `%${search}%` } }];
+  }
+
+  if (authUser?.role === 'student') {
+    if (!authUser.email) {
+      throw new ApiError(403, 'Student account must include an email address');
+    }
+    studentWhere.Email = authUser.email;
+  }
+
   const include = [
     {
       model: Student,
-      where: search
-        ? {
-            [Op.or]: [
-              { FirstName: { [Op.like]: `%${search}%` } },
-              { LastName: { [Op.like]: `%${search}%` } },
-            ],
-          }
-        : undefined,
-      required: !!search,
+      where: Object.keys(studentWhere).length > 0 ? studentWhere : undefined,
+      required: Object.keys(studentWhere).length > 0,
     },
     {
       model: JobPosting,
@@ -57,7 +63,7 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status }
   return getPagingData(result, pagination.page, pagination.limit);
 };
 
-const getApplicationById = async (id) => {
+const getApplicationById = async (id, authUser) => {
   const application = await Application.findByPk(id, {
     include: [
       { model: Student },
@@ -72,10 +78,17 @@ const getApplicationById = async (id) => {
   if (!application) {
     throw new ApiError(404, 'Application not found');
   }
+
+  if (authUser?.role === 'student') {
+    if (!authUser.email || application.Student?.Email !== authUser.email) {
+      throw new ApiError(403, 'Forbidden: cannot access other student applications');
+    }
+  }
+
   return application;
 };
 
-const applyForJob = async (payload) => {
+const applyForJob = async (payload, authUser) => {
   const transaction = await sequelize.transaction();
   try {
     const student = await Student.findByPk(payload.StudentID, { transaction });
@@ -83,9 +96,34 @@ const applyForJob = async (payload) => {
       throw new ApiError(404, 'Student not found');
     }
 
+    if (authUser?.role === 'student') {
+      if (!authUser.email) {
+        throw new ApiError(403, 'Student account must include an email address');
+      }
+      if (!student.Email || student.Email !== authUser.email) {
+        throw new ApiError(403, 'Students can only apply using their own student profile');
+      }
+    }
+
     const job = await JobPosting.findByPk(payload.JobID, { transaction });
     if (!job) {
       throw new ApiError(404, 'Job posting not found');
+    }
+
+    const existingPlacement = await Placement.findOne({
+      include: [
+        {
+          model: Application,
+          where: { StudentID: payload.StudentID },
+          required: true,
+        },
+      ],
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+
+    if (existingPlacement) {
+      throw new ApiError(409, 'Student is already placed and cannot apply to new jobs');
     }
 
     const duplicate = await Application.findOne({
@@ -110,8 +148,8 @@ const applyForJob = async (payload) => {
   }
 };
 
-const updateApplicationStatus = async (id, status) => {
-  const application = await getApplicationById(id);
+const updateApplicationStatus = async (id, status, authUser) => {
+  const application = await getApplicationById(id, authUser);
   application.Status = status;
   await application.save();
   return application;

@@ -1,15 +1,29 @@
+const { Op } = require('sequelize');
 const { sequelize, Placement, Application, Student, JobPosting, Company } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
 
-const getPlacements = async ({ page, limit }) => {
+const getPlacements = async ({ page, limit }, authUser) => {
   const pagination = getPagination(page, limit);
+  const studentWhere = {};
+
+  if (authUser?.role === 'student') {
+    if (!authUser.email) {
+      throw new ApiError(403, 'Student account must include an email address');
+    }
+    studentWhere.Email = authUser.email;
+  }
+
   const result = await Placement.findAndCountAll({
     include: [
       {
         model: Application,
         include: [
-          { model: Student },
+          {
+            model: Student,
+            where: Object.keys(studentWhere).length > 0 ? studentWhere : undefined,
+            required: Object.keys(studentWhere).length > 0,
+          },
           {
             model: JobPosting,
             include: [{ model: Company }],
@@ -25,7 +39,7 @@ const getPlacements = async ({ page, limit }) => {
   return getPagingData(result, pagination.page, pagination.limit);
 };
 
-const createPlacement = async (payload) => {
+const createPlacement = async (payload, authUser) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -52,7 +66,25 @@ const createPlacement = async (payload) => {
       throw new ApiError(409, 'Placement already exists for this application');
     }
 
+    if (authUser?.role === 'student') {
+      throw new ApiError(403, 'Forbidden: students cannot create placements');
+    }
+
     const placement = await Placement.create(payload, { transaction });
+
+    // Once a student is placed, close all their other active applications.
+    await Application.update(
+      { Status: 'Rejected' },
+      {
+        where: {
+          StudentID: application.StudentID,
+          AppID: { [Op.ne]: payload.AppID },
+          Status: { [Op.in]: ['Applied', 'Selected'] },
+        },
+        transaction,
+      }
+    );
+
     await transaction.commit();
 
     return placement;

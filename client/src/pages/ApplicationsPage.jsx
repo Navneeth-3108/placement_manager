@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import PageHeader from '../components/PageHeader';
 import Alert from '../components/Alert';
 import Pagination from '../components/Pagination';
 import StatusBadge from '../components/StatusBadge';
 import usePaginatedResource from '../hooks/usePaginatedResource';
+import useRbacRole from '../hooks/useRbacRole';
 import { getList, patchItem, postItem } from '../services/endpoints';
 
 const ApplicationsPage = () => {
@@ -11,6 +13,8 @@ const ApplicationsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [filters, setFilters] = useState({ search: '', Status: '' });
   const [form, setForm] = useState({ StudentID: '', JobID: '', ApplyDate: '' });
+  const permissions = useRbacRole();
+  const { user, isLoaded } = useUser();
 
   const fetchApplications = useCallback(
     (query) => getList('/applications', { ...query, ...filters }),
@@ -30,6 +34,19 @@ const ApplicationsPage = () => {
         setJobs([]);
       });
   }, []);
+
+  useEffect(() => {
+    if (!permissions.isStudent || !isLoaded) {
+      return;
+    }
+
+    const email = String(user?.primaryEmailAddress?.emailAddress || '').toLowerCase();
+    const matchedStudent = students.find((student) => String(student.Email || '').toLowerCase() === email);
+
+    if (matchedStudent?.StudentID) {
+      setForm((prev) => ({ ...prev, StudentID: String(matchedStudent.StudentID) }));
+    }
+  }, [isLoaded, permissions.isStudent, students, user]);
 
   const submitApplication = async (event) => {
     event.preventDefault();
@@ -65,7 +82,7 @@ const ApplicationsPage = () => {
       </div>
 
       <form onSubmit={submitApplication} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
-        <select required value={form.StudentID} onChange={(e) => setForm((p) => ({ ...p, StudentID: e.target.value }))} className="ui-select">
+        <select required disabled={!permissions.canManage} value={form.StudentID} onChange={(e) => setForm((p) => ({ ...p, StudentID: e.target.value }))} className="ui-select">
           <option value="">Select Student</option>
           {students.map((student) => <option key={student.StudentID} value={student.StudentID}>{student.FirstName} {student.LastName}</option>)}
         </select>
@@ -74,7 +91,7 @@ const ApplicationsPage = () => {
           {jobs.map((job) => <option key={job.JobID} value={job.JobID}>{job.JobRole} - {job.Company?.CompanyName || 'Company'}</option>)}
         </select>
         <input required type="date" value={form.ApplyDate} onChange={(e) => setForm((p) => ({ ...p, ApplyDate: e.target.value }))} className="ui-input" />
-        <button type="submit" className="ui-btn-ink">Apply to Job</button>
+        <button type="submit" className="ui-btn-ink" disabled={!permissions.canManage && !permissions.isStudent}>Apply to Job</button>
       </form>
 
       <div className="ui-card overflow-x-auto p-3">
@@ -85,7 +102,7 @@ const ApplicationsPage = () => {
               <th className="ui-th">Job</th>
               <th className="ui-th">Company</th>
               <th className="ui-th">Status</th>
-              <th className="ui-th">Update</th>
+              {permissions.canManage && <th className="ui-th">Update</th>}
             </tr>
           </thead>
           <tbody>
@@ -95,7 +112,7 @@ const ApplicationsPage = () => {
                 <td className="ui-td">{item.JobPosting?.JobRole || '-'}</td>
                 <td className="ui-td">{item.JobPosting?.Company?.CompanyName || '-'}</td>
                 <td className="ui-td"><StatusBadge status={item.Status} /></td>
-                <td className="ui-td">
+                {permissions.canManage && <td className="ui-td">
                   <select
                     value={item.Status}
                     onChange={(e) => updateStatus(item.AppID, e.target.value)}
@@ -105,7 +122,7 @@ const ApplicationsPage = () => {
                     <option value="Selected">Selected</option>
                     <option value="Rejected">Rejected</option>
                   </select>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

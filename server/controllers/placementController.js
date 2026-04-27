@@ -3,7 +3,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 const { ensureNumber, ensureRequired } = require('../utils/validators');
 
 const listPlacements = asyncHandler(async (req, res) => {
-  const result = await placementService.getPlacements(req.query);
+  const result = await placementService.getPlacements(req.query, req.authUser);
   res.json({ success: true, ...result });
 });
 
@@ -14,7 +14,7 @@ const createPlacement = asyncHandler(async (req, res) => {
     OfferDate: req.body.OfferDate,
     JoiningDate: req.body.JoiningDate,
   };
-  const data = await placementService.createPlacement(payload);
+  const data = await placementService.createPlacement(payload, req.authUser);
   res.status(201).json({ success: true, data });
 });
 

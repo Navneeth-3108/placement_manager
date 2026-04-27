@@ -7,8 +7,11 @@ const jobPostingRoutes = require('./jobPostingRoutes');
 const applicationRoutes = require('./applicationRoutes');
 const placementRoutes = require('./placementRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
+const { authenticateRequest } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.use(authenticateRequest);
 
 router.use('/departments', departmentRoutes);
 router.use('/students', studentRoutes);

@@ -3,12 +3,14 @@ import PageHeader from '../components/PageHeader';
 import Alert from '../components/Alert';
 import Pagination from '../components/Pagination';
 import usePaginatedResource from '../hooks/usePaginatedResource';
+import useRbacRole from '../hooks/useRbacRole';
 import { deleteItem, getList, postItem } from '../services/endpoints';
 
 const JobsPage = () => {
   const [companies, setCompanies] = useState([]);
   const [filters, setFilters] = useState({ search: '', CompanyID: '' });
   const [form, setForm] = useState({ JobRole: '', Package: '', Eligibility: '', CompanyID: '' });
+  const permissions = useRbacRole();
 
   const fetchJobs = useCallback((query) => getList('/jobs', { ...query, ...filters }), [filters]);
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchJobs);
@@ -49,7 +51,7 @@ const JobsPage = () => {
         <button type="button" onClick={() => setQuery((prev) => ({ ...prev, page: 1 }))} className="ui-btn-primary">Apply Filters</button>
       </div>
 
-      <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
+      {permissions.canManage && <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <input required value={form.JobRole} onChange={(e) => setForm((p) => ({ ...p, JobRole: e.target.value }))} placeholder="Job Role" className="ui-input" />
         <input required type="number" value={form.Package} onChange={(e) => setForm((p) => ({ ...p, Package: e.target.value }))} placeholder="Package" className="ui-input" />
         <input required value={form.Eligibility} onChange={(e) => setForm((p) => ({ ...p, Eligibility: e.target.value }))} placeholder="Eligibility" className="ui-input" />
@@ -58,7 +60,7 @@ const JobsPage = () => {
           {companies.map((company) => <option key={company.CompanyID} value={company.CompanyID}>{company.CompanyName}</option>)}
         </select>
         <button type="submit" className="ui-btn-ink">Add Job</button>
-      </form>
+      </form>}
 
       <div className="ui-card overflow-x-auto p-3">
         <table className="ui-table">
@@ -68,7 +70,7 @@ const JobsPage = () => {
               <th className="ui-th">Company</th>
               <th className="ui-th">Package</th>
               <th className="ui-th">Eligibility</th>
-              <th className="ui-th">Action</th>
+              {permissions.canDelete && <th className="ui-th">Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -78,11 +80,11 @@ const JobsPage = () => {
                 <td className="ui-td">{job.Company?.CompanyName || '-'}</td>
                 <td className="ui-td">{job.Package}</td>
                 <td className="ui-td">{job.Eligibility}</td>
-                <td className="ui-td">
+                {permissions.canDelete && <td className="ui-td">
                   <button type="button" className="ui-btn-ghost px-3 py-1 text-rose-700" onClick={() => removeJob(job.JobID)}>
                     Delete
                   </button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

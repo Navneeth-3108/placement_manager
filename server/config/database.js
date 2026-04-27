@@ -57,29 +57,53 @@ const commonOptions = {
     freezeTableName: true,
     timestamps: false,
   },
-};
-
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  ...commonOptions,
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
   pool: {
     max: 10,
     min: 0,
     acquire: 60000,
     idle: 10000,
   },
-  hooks: {
+};
+
+const databaseUrl = process.env.DATABASE_URL;
+const configuredDialect = process.env.DB_DIALECT;
+const resolvedDialect = configuredDialect || (databaseUrl ? 'postgres' : 'mysql');
+const useSsl = String(process.env.DB_SSL).toLowerCase() === 'true';
+
+const sequelizeConfig = {
+  ...commonOptions,
+  dialect: resolvedDialect,
+};
+
+if (resolvedDialect === 'postgres') {
+  sequelizeConfig.hooks = {
     beforeConnect: (config) => {
-      // If a system prefers IPv4, this helps avoid IPv6-only DNS answers causing ENOTFOUND/timeout.
+      // Prefer IPv4 to avoid local DNS/IPv6 resolution issues in some networks.
       config.family = 4;
     },
-  },
-});
+  };
+}
+
+if (useSsl) {
+  sequelizeConfig.dialectOptions = {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  };
+}
+
+const sequelize = databaseUrl
+  ? new Sequelize(databaseUrl, sequelizeConfig)
+  : new Sequelize(
+      process.env.DB_NAME,
+      process.env.DB_USER,
+      process.env.DB_PASSWORD,
+      {
+        ...sequelizeConfig,
+        host: process.env.DB_HOST || 'localhost',
+        port: Number(process.env.DB_PORT || (resolvedDialect === 'postgres' ? 5432 : 3306)),
+      }
+    );
 
 module.exports = sequelize;

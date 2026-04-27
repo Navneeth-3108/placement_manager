@@ -1,6 +1,6 @@
 import { UserButton } from '@clerk/clerk-react';
 
-const Navbar = ({ onMenuClick }) => {
+const Navbar = ({ onMenuClick, role }) => {
   return (
     <header className="sticky top-0 z-10 mb-6 rounded-2xl border border-emerald-900/50 bg-[#0b1511]/90 px-4 py-3 shadow-card backdrop-blur">
       <div className="flex items-center justify-between gap-4">
@@ -24,6 +24,7 @@ const Navbar = ({ onMenuClick }) => {
           <h2 className="text-lg font-bold text-emerald-50">Placement Management System</h2>
         </div>
         <div className="hidden items-center gap-2 text-xs text-emerald-200/80 sm:flex">
+          <span className="rounded-full border border-emerald-800 bg-emerald-900/30 px-3 py-1 uppercase">{role}</span>
           <span className="rounded-full border border-emerald-800 bg-emerald-900/30 px-3 py-1">API</span>
           <span className="rounded-full border border-emerald-800 bg-emerald-900/30 px-3 py-1">DB</span>
           <UserButton afterSignOutUrl="/sign-in" />
