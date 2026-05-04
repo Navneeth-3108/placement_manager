@@ -14,14 +14,35 @@ const getApplication = asyncHandler(async (req, res) => {
   res.json({ success: true, data });
 });
 
+const { Student } = require('../models');
+
 const applyForJob = asyncHandler(async (req, res) => {
-  ensureRequired(req.body, ['StudentID', 'JobID', 'ApplyDate']);
+  // allow StudentID to be omitted for authenticated student users
+  ensureRequired(req.body, ['JobID', 'ApplyDate']);
+
+  let studentId = req.body.StudentID;
+  if (!studentId && req.authUser?.role === 'student') {
+    if (!req.authUser.email) {
+      throw new ApiError(403, 'Student account must include an email address');
+    }
+    const student = await Student.findOne({ where: { Email: req.authUser.email } });
+    if (!student) {
+      throw new ApiError(404, 'Student profile not found for authenticated student');
+    }
+    studentId = student.StudentID;
+  }
+
+  if (!studentId) {
+    throw new ApiError(400, 'Missing required field: StudentID');
+  }
+
   const payload = {
-    StudentID: ensureNumber(req.body.StudentID, 'StudentID'),
+    StudentID: ensureNumber(studentId, 'StudentID'),
     JobID: ensureNumber(req.body.JobID, 'JobID'),
     ApplyDate: req.body.ApplyDate,
     Status: req.body.Status || 'Applied',
   };
+
   const data = await applicationService.applyForJob(payload, req.authUser);
   res.status(201).json({ success: true, data });
 });

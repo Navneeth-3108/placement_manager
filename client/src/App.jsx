@@ -7,6 +7,7 @@ import CompaniesPage from './pages/CompaniesPage';
 import JobsPage from './pages/JobsPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import PlacementsPage from './pages/PlacementsPage';
+import DepartmentsPage from './pages/DepartmentsPage';
 import SignInPage from './pages/SignInPage';
 import useRbacRole from './hooks/useRbacRole';
 
@@ -30,6 +31,7 @@ const App = () => {
       >
         <Route path="/" element={permissions.canViewDashboard ? <DashboardPage /> : <Navigate to="/applications" replace />} />
         <Route path="/students" element={<StudentsPage />} />
+        <Route path="/departments" element={<DepartmentsPage />} />
         <Route path="/companies" element={<CompaniesPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/applications" element={<ApplicationsPage />} />

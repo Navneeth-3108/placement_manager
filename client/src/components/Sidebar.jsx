@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const navItems = [
   { to: '/', label: 'Dashboard', allow: ({ canViewDashboard }) => canViewDashboard },
   { to: '/students', label: 'Students' },
+  { to: '/departments', label: 'Departments' },
   { to: '/companies', label: 'Companies' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/applications', label: 'Applications' },

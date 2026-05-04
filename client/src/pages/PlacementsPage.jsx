@@ -15,7 +15,7 @@ const PlacementsPage = () => {
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchPlacements);
 
   useEffect(() => {
-    getList('/applications', { page: 1, limit: 200, Status: 'Selected' })
+    getList('/applications', { page: 1, limit: 200, Status: 'Selected', unplaced: true })
       .then((res) => setApplications(res.data || []))
       .catch(() => setApplications([]));
   }, [reload]);

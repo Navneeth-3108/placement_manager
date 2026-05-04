@@ -10,7 +10,7 @@ const {
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
 
-const getApplications = async ({ page, limit, search, StudentID, JobID, Status }, authUser) => {
+const getApplications = async ({ page, limit, search, StudentID, JobID, Status, unplaced }, authUser) => {
   const pagination = getPagination(page, limit);
   const where = {};
 
@@ -27,7 +27,11 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status }
   const studentWhere = {};
 
   if (search) {
-    studentWhere[Op.or] = [{ FirstName: { [Op.like]: `%${search}%` } }, { LastName: { [Op.like]: `%${search}%` } }];
+    // search against the Student columns using case-insensitive search
+    studentWhere[Op.or] = [
+      sequelize.where(sequelize.fn('LOWER', sequelize.col('FirstName')), Op.like, `%${search.toLowerCase()}%`),
+      sequelize.where(sequelize.fn('LOWER', sequelize.col('LastName')), Op.like, `%${search.toLowerCase()}%`),
+    ];
   }
 
   if (authUser?.role === 'student') {
@@ -51,6 +55,12 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status }
       model: Placement,
     },
   ];
+
+  // support filtering for only unplaced applications (no placement record)
+  if (unplaced && (unplaced === true || String(unplaced).toLowerCase() === 'true')) {
+    // ensure Placement is included (it already is) and filter where placement is null
+    where['$Placement.PlaceID$'] = null;
+  }
 
   const result = await Application.findAndCountAll({
     where,

@@ -27,10 +27,7 @@ const Department = sequelize.define(
         notEmpty: { msg: 'HOD is required' },
       },
     },
-    Location: {
-      type: DataTypes.STRING(150),
-      allowNull: true,
-    },
+    
   },
   {
     tableName: 'Department',

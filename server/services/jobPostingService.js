@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { JobPosting, Company } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
+const { ciLike } = require('../utils/search');
 
 const getJobPostings = async ({ page, limit, search, CompanyID }) => {
   const pagination = getPagination(page, limit);
@@ -12,10 +13,7 @@ const getJobPostings = async ({ page, limit, search, CompanyID }) => {
   }
 
   if (search) {
-    where[Op.or] = [
-      { JobRole: { [Op.like]: `%${search}%` } },
-      { Eligibility: { [Op.like]: `%${search}%` } },
-    ];
+    where[Op.or] = [ciLike('JobRole', search), ciLike('Eligibility', search)];
   }
 
   const result = await JobPosting.findAndCountAll({
