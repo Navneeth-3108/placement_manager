@@ -63,7 +63,7 @@ const StudentsPage = () => {
         <input
           value={filters.search}
           onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-          placeholder="Search by name or email"
+          placeholder="Search by Student ID, name, or email"
           className="ui-input"
         />
         <select

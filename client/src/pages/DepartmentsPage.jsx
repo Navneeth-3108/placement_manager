@@ -8,9 +8,10 @@ import { deleteItem, getList, postItem } from '../services/endpoints';
 
 const DepartmentsPage = () => {
   const [form, setForm] = useState({ DeptName: '', HOD: '' });
+  const [search, setSearch] = useState('');
   const permissions = useRbacRole();
 
-  const fetchDepartments = useCallback((query) => getList('/departments', query), []);
+  const fetchDepartments = useCallback((query) => getList('/departments', { ...query, search }), [search]);
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchDepartments);
 
   const submitForm = async (e) => {
@@ -35,6 +36,22 @@ const DepartmentsPage = () => {
       <PageHeader title="Departments" description="Manage academic departments" />
 
       <Alert message={error} />
+
+      <div className="ui-card mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by Department ID or name"
+          className="ui-input"
+        />
+        <button
+          type="button"
+          onClick={() => setQuery((p) => ({ ...p, page: 1 }))}
+          className="ui-btn-primary"
+        >
+          Search
+        </button>
+      </div>
 
       {permissions.canManage && (
         <form onSubmit={submitForm} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-3">

@@ -11,6 +11,7 @@ import { getList, patchItem, postItem } from '../services/endpoints';
 const ApplicationsPage = () => {
   const [students, setStudents] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [placedStudentIds, setPlacedStudentIds] = useState(new Set());
   const [filters, setFilters] = useState({ search: '', Status: '' });
   const [form, setForm] = useState({ StudentID: '', JobID: '', ApplyDate: '' });
   const permissions = useRbacRole();
@@ -24,14 +25,25 @@ const ApplicationsPage = () => {
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchApplications);
 
   useEffect(() => {
-    Promise.all([getList('/students', { page: 1, limit: 200 }), getList('/jobs', { page: 1, limit: 200 })])
-      .then(([studentsRes, jobsRes]) => {
+    Promise.all([
+      getList('/students', { page: 1, limit: 200 }),
+      getList('/jobs', { page: 1, limit: 200 }),
+      getList('/placements', { page: 1, limit: 1000 }),
+    ])
+      .then(([studentsRes, jobsRes, placementsRes]) => {
         setStudents(studentsRes.data || []);
         setJobs(jobsRes.data || []);
+        const ids = new Set(
+          (placementsRes.data || [])
+            .map((placement) => placement?.Application?.StudentID)
+            .filter((id) => Number.isInteger(id))
+        );
+        setPlacedStudentIds(ids);
       })
       .catch(() => {
         setStudents([]);
         setJobs([]);
+        setPlacedStudentIds(new Set());
       });
   }, []);
 
@@ -65,13 +77,16 @@ const ApplicationsPage = () => {
     reload();
   };
 
+  const selectedStudentId = form.StudentID ? Number(form.StudentID) : null;
+  const isSelectedStudentPlaced = selectedStudentId !== null && placedStudentIds.has(selectedStudentId);
+
   return (
     <section className="fade-up">
       <PageHeader title="Applications" description="Students can apply and status can be updated to selected or rejected" />
       <Alert message={error} />
 
       <div className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-3">
-        <input value={filters.search} onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))} placeholder="Search by student name" className="ui-input" />
+        <input value={filters.search} onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))} placeholder="Search by IDs, student name, job role, or company" className="ui-input" />
         <select value={filters.Status} onChange={(e) => setFilters((p) => ({ ...p, Status: e.target.value }))} className="ui-select">
           <option value="">All Statuses</option>
           <option value="Applied">Applied</option>
@@ -84,15 +99,22 @@ const ApplicationsPage = () => {
       <form onSubmit={submitApplication} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <select required disabled={!permissions.canManage} value={form.StudentID} onChange={(e) => setForm((p) => ({ ...p, StudentID: e.target.value }))} className="ui-select">
           <option value="">Select Student</option>
-          {students.map((student) => <option key={student.StudentID} value={student.StudentID}>{student.FirstName} {student.LastName}</option>)}
+          {students.map((student) => (
+            <option key={student.StudentID} value={student.StudentID} disabled={placedStudentIds.has(student.StudentID)}>
+              {student.FirstName} {student.LastName}{placedStudentIds.has(student.StudentID) ? ' (Placed)' : ''}
+            </option>
+          ))}
         </select>
         <select required value={form.JobID} onChange={(e) => setForm((p) => ({ ...p, JobID: e.target.value }))} className="ui-select">
           <option value="">Select Job</option>
           {jobs.map((job) => <option key={job.JobID} value={job.JobID}>{job.JobRole} - {job.Company?.CompanyName || 'Company'}</option>)}
         </select>
         <input required type="date" value={form.ApplyDate} onChange={(e) => setForm((p) => ({ ...p, ApplyDate: e.target.value }))} className="ui-input" />
-        <button type="submit" className="ui-btn-ink" disabled={!permissions.canManage && !permissions.isStudent}>Apply to Job</button>
+        <button type="submit" className="ui-btn-ink" disabled={(!permissions.canManage && !permissions.isStudent) || isSelectedStudentPlaced}>
+          Apply to Job
+        </button>
       </form>
+      {isSelectedStudentPlaced && <p className="mb-4 text-sm font-medium text-rose-700">This student is already placed. New applications are locked.</p>}
 
       <div className="ui-card overflow-x-auto p-3">
         <table className="ui-table">

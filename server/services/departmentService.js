@@ -2,13 +2,17 @@ const { Op } = require('sequelize');
 const { Department } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
-const { ciLike } = require('../utils/search');
+const { ciLike, toSearchNumber } = require('../utils/search');
 
 const getDepartments = async ({ page, limit, search }) => {
   const pagination = getPagination(page, limit);
   const where = {};
   if (search) {
+    const searchId = toSearchNumber(search);
     where[Op.or] = [ciLike('DeptName', search)];
+    if (searchId !== null) {
+      where[Op.or].push({ DeptID: searchId });
+    }
   }
 
   const result = await Department.findAndCountAll({

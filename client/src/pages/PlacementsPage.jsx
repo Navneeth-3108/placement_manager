@@ -8,10 +8,11 @@ import { getList, postItem } from '../services/endpoints';
 
 const PlacementsPage = () => {
   const [applications, setApplications] = useState([]);
+  const [search, setSearch] = useState('');
   const [form, setForm] = useState({ AppID: '', OfferDate: '', JoiningDate: '' });
   const permissions = useRbacRole();
 
-  const fetchPlacements = useCallback((query) => getList('/placements', query), []);
+  const fetchPlacements = useCallback((query) => getList('/placements', { ...query, search }), [search]);
   const { data, pagination, query, setQuery, reload, error } = usePaginatedResource(fetchPlacements);
 
   useEffect(() => {
@@ -35,6 +36,22 @@ const PlacementsPage = () => {
     <section className="fade-up">
       <PageHeader title="Placements" description="Create final placement records only for selected applications" />
       <Alert message={error} />
+
+      <div className="ui-card mb-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by IDs, student name, job role, or company"
+          className="ui-input"
+        />
+        <button
+          type="button"
+          onClick={() => setQuery((prev) => ({ ...prev, page: 1 }))}
+          className="ui-btn-primary"
+        >
+          Search
+        </button>
+      </div>
 
       {permissions.canManage && <form onSubmit={submitPlacement} className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-4">
         <select required value={form.AppID} onChange={(e) => setForm((p) => ({ ...p, AppID: e.target.value }))} className="ui-select">

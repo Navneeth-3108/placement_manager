@@ -36,7 +36,7 @@ const CompaniesPage = () => {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search company"
+          placeholder="Search by Company ID or name"
           className="ui-input"
         />
         <button

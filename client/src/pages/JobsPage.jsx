@@ -43,7 +43,7 @@ const JobsPage = () => {
       <Alert message={error} />
 
       <div className="ui-card mb-4 grid gap-3 p-4 md:grid-cols-3">
-        <input value={filters.search} onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))} placeholder="Search role or eligibility" className="ui-input" />
+        <input value={filters.search} onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))} placeholder="Search by Job ID, role, or eligibility" className="ui-input" />
         <select value={filters.CompanyID} onChange={(e) => setFilters((p) => ({ ...p, CompanyID: e.target.value }))} className="ui-select">
           <option value="">All Companies</option>
           {companies.map((company) => <option key={company.CompanyID} value={company.CompanyID}>{company.CompanyName}</option>)}

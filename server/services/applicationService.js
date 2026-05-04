@@ -9,6 +9,7 @@ const {
 } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
+const { toSearchNumber } = require('../utils/search');
 
 const getApplications = async ({ page, limit, search, StudentID, JobID, Status, unplaced }, authUser) => {
   const pagination = getPagination(page, limit);
@@ -25,13 +26,25 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status, 
   }
 
   const studentWhere = {};
-
   if (search) {
-    // search against the Student columns using case-insensitive search
-    studentWhere[Op.or] = [
-      sequelize.where(sequelize.fn('LOWER', sequelize.col('FirstName')), Op.like, `%${search.toLowerCase()}%`),
-      sequelize.where(sequelize.fn('LOWER', sequelize.col('LastName')), Op.like, `%${search.toLowerCase()}%`),
+    const normalizedSearch = String(search).trim().toLowerCase();
+    const searchId = toSearchNumber(search);
+    const searchConditions = [
+      sequelize.where(sequelize.fn('LOWER', sequelize.col('Student.FirstName')), Op.like, `%${normalizedSearch}%`),
+      sequelize.where(sequelize.fn('LOWER', sequelize.col('Student.LastName')), Op.like, `%${normalizedSearch}%`),
+      sequelize.where(sequelize.fn('LOWER', sequelize.col('JobPosting.JobRole')), Op.like, `%${normalizedSearch}%`),
+      sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('JobPosting.Company.CompanyName')),
+        Op.like,
+        `%${normalizedSearch}%`
+      ),
     ];
+
+    if (searchId !== null) {
+      searchConditions.push({ AppID: searchId }, { StudentID: searchId }, { JobID: searchId });
+    }
+
+    where[Op.and] = [...(where[Op.and] || []), { [Op.or]: searchConditions }];
   }
 
   if (authUser?.role === 'student') {
@@ -45,10 +58,11 @@ const getApplications = async ({ page, limit, search, StudentID, JobID, Status, 
     {
       model: Student,
       where: Object.keys(studentWhere).length > 0 ? studentWhere : undefined,
-      required: Object.keys(studentWhere).length > 0,
+      required: true,
     },
     {
       model: JobPosting,
+      required: true,
       include: [{ model: Company }],
     },
     {
@@ -120,14 +134,9 @@ const applyForJob = async (payload, authUser) => {
       throw new ApiError(404, 'Job posting not found');
     }
 
-    const existingPlacement = await Placement.findOne({
-      include: [
-        {
-          model: Application,
-          where: { StudentID: payload.StudentID },
-          required: true,
-        },
-      ],
+    const existingPlacement = await Application.findOne({
+      where: { StudentID: payload.StudentID },
+      include: [{ model: Placement, required: true }],
       transaction,
       lock: transaction.LOCK.UPDATE,
     });

@@ -2,9 +2,11 @@ const { Op } = require('sequelize');
 const { sequelize, Placement, Application, Student, JobPosting, Company } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getPagination, getPagingData } = require('../utils/pagination');
+const { toSearchNumber } = require('../utils/search');
 
-const getPlacements = async ({ page, limit }, authUser) => {
+const getPlacements = async ({ page, limit, search }, authUser) => {
   const pagination = getPagination(page, limit);
+  const where = {};
   const studentWhere = {};
 
   if (authUser?.role === 'student') {
@@ -14,7 +16,41 @@ const getPlacements = async ({ page, limit }, authUser) => {
     studentWhere.Email = authUser.email;
   }
 
+  if (search) {
+    const normalizedSearch = String(search).trim().toLowerCase();
+    const searchId = toSearchNumber(search);
+    const searchConditions = [
+      sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('Application.Student.FirstName')),
+        Op.like,
+        `%${normalizedSearch}%`
+      ),
+      sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('Application.Student.LastName')),
+        Op.like,
+        `%${normalizedSearch}%`
+      ),
+      sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('Application.JobPosting.JobRole')),
+        Op.like,
+        `%${normalizedSearch}%`
+      ),
+      sequelize.where(
+        sequelize.fn('LOWER', sequelize.col('Application.JobPosting.Company.CompanyName')),
+        Op.like,
+        `%${normalizedSearch}%`
+      ),
+    ];
+
+    if (searchId !== null) {
+      searchConditions.push({ PlaceID: searchId }, { AppID: searchId }, { '$Application.AppID$': searchId });
+    }
+
+    where[Op.and] = [...(where[Op.and] || []), { [Op.or]: searchConditions }];
+  }
+
   const result = await Placement.findAndCountAll({
+    where,
     include: [
       {
         model: Application,
